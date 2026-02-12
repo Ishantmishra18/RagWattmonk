@@ -1,29 +1,21 @@
 from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
-class VectorStore:
-    def __init__(self, persist_directory: str = "chroma_db"):
-        """
-        Initializes Chroma vector store with OpenAI embeddings
-        """
-        self.embedding_function = OpenAIEmbeddings()
-        self.vectordb = Chroma(
-            persist_directory=persist_directory,
-            embedding_function=self.embedding_function
+class ChromaVectorStore:
+    def __init__(self):
+        self.embedding_model = HuggingFaceEmbeddings(
+            model_name="all-MiniLM-L6-v2"
         )
 
-    def add_texts(self, texts: list[str], metadatas: list[dict] | None = None):
-        """
-        Add documents to vector store
-        """
-        self.vectordb.add_texts(
-            texts=texts,
-            metadatas=metadatas
+        self.db = Chroma(
+            collection_name="rag_collection",
+            embedding_function=self.embedding_model,
+            persist_directory="./chroma_db"
         )
-        self.vectordb.persist()
 
-    def similarity_search(self, query: str, k: int = 3):
-        """
-        Search similar documents
-        """
-        return self.vectordb.similarity_search(query, k=k)
+    def add_documents(self, texts):
+        self.db.add_texts(texts)
+
+    def search(self, query, k=3):
+        docs = self.db.similarity_search(query, k=k)
+        return [doc.page_content for doc in docs]

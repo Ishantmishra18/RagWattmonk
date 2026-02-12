@@ -1,12 +1,8 @@
-def chunk_text(text, chunk_size=300, overlap=50):
-    """
-    Splits long text into overlapping chunks.
-    """
-    words = text.split()
-    chunks = []
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-    for i in range(0, len(words), chunk_size - overlap):
-        chunk = " ".join(words[i:i + chunk_size])
-        chunks.append(chunk)
-
-    return chunks
+def chunk_documents(documents):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50
+    )
+    return splitter.split_documents(documents)
