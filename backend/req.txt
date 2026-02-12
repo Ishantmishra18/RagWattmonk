@@ -6,6 +6,12 @@ langchain
 langchain-community
 langchain-openai
 langchain-text-splitters
+openai
+google-genai
+
+
+
+
 
 sentence-transformers
 chromadb
@@ -15,3 +21,4 @@ scikit-learn
 pydantic
 
 requests
+

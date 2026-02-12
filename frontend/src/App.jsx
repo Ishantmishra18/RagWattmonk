@@ -51,7 +51,7 @@ function App() {
         {answer && (
           <div className="mt-8 p-6 bg-black/20 rounded-lg border border-white/10">
             <h4 className="font-semibold text-pink-400 mb-2">Answer</h4>
-            <p className="text-gray-200">here is the response {answer}</p>
+            <p className="text-gray-200">{answer}</p>
           </div>
         )}
       </div>

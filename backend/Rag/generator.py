@@ -1,28 +1,35 @@
-from transformers import pipeline
+import os
+from dotenv import load_dotenv
+from google import genai
 
-# Load LLM
-generator = pipeline(
-    "text-generation",
-    model="gpt2",
-    max_new_tokens=200
-)
+load_dotenv()
 
-def generate_answer(query, context_chunks):
-    """
-    Generates final answer using retrieved context.
-    """
-    context = "\n".join(context_chunks)
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+def generate_answer(query: str, context: str):
 
     prompt = f"""
-    Answer the question using ONLY the context below.
+You are an intelligent assistant.
 
-    Context:
-    {context}
+Use ONLY the provided context to answer the question.
+If the answer is not found in the context, say "I don't know".
 
-    Question:
-    {query}
+Context:
+{context}
 
-    Answer:
-    """
+Question:
+{query}
 
-    return generator(prompt)[0]["generated_text"]
+Answer:
+"""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
+        return response.text
+
+    except Exception as e:
+        return f"Error: {str(e)}"

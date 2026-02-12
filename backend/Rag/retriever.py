@@ -1,3 +1,3 @@
-def retrieve(query: str, vectorstore, k: int = 3):
-    results = vectorstore.search(query, k=k)
+def retrieve(query: str, vectorstore):
+    results = vectorstore.search(query)
     return "\n".join(results)
