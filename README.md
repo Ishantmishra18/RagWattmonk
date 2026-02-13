@@ -131,12 +131,12 @@ npm run dev
 
 If using Gemini/OpenAI:
 
-##Create .env file in backend:
+## Create .env file in backend:
 ```
 GOOGLE_API_KEY=your_key_here
 ```
 
-##Then access via:
+## Then access via:
 ```
 import os
 os.getenv("GOOGLE_API_KEY")
