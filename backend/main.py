@@ -1,36 +1,68 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from rag.loader import load_pdf
-from rag.chunker import chunk_documents
-from rag.vectorStore import ChromaVectorStore
-from rag.retriever import retrieve
+from rag.vectorStore import ingest_pdf, retrieve
 from rag.generator import generate_answer
+from rag.vectorStore import get_collection
 
 app = FastAPI()
 
-vectorstore = ChromaVectorStore()
-
+# -----------------------------
+# Enable CORS (for frontend)
+# -----------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # change in production
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# -----------------------------
+# Health Check
+# -----------------------------
 @app.get("/")
 def health():
-    return {"status": "Backend running"}
+    return {"status": "Backend running successfully"}
 
-@app.post("/ingest")
+# -----------------------------
+# Ingest PDF (Run Once)
+# -----------------------------
+
+@app.get("/ingest_pdf")
 def ingest():
-    documents = load_pdf("data/2017-NEC-Code-2.pdf")
-    chunks = chunk_documents(documents)
-    vectorstore.add_documents(chunks)
-    return {"status": "NEC PDF ingested successfully"}
+    ingest_pdf("Data/main.pdf")  # Make sure path is correct
+    return {"status": "PDF ingested successfully"}
 
+
+
+@app.get("/count")
+def count_documents():
+    try:
+        collection = get_collection()
+        return {"total_documents": collection.count()}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+
+# -----------------------------
+# Ask Question (RAG endpoint)
+# -----------------------------
 @app.get("/ask")
 def ask(query: str):
-    context = retrieve(query, vectorstore)
+    print("\n==============================")
+    print("Incoming Query:", query)
+
+    context = retrieve(query)
+    print("Retrieved Context Length:", len(context))
+
+    if not context:
+        return {"answer": "No relevant context found in database."}
+
     answer = generate_answer(query, context)
+
+    print("Generated Answer:", answer)
+    print("==============================\n")
+
     return {"answer": answer}
+ 

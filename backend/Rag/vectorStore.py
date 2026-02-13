@@ -1,21 +1,79 @@
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+import chromadb
+from chromadb.config import Settings
+from sentence_transformers import SentenceTransformer
+from rag.pdf_loader import load_pdf
+from rag.chunker import chunk_text
 
-class ChromaVectorStore:
-    def __init__(self):
-        self.embedding_model = HuggingFaceEmbeddings(
-            model_name="all-MiniLM-L6-v2"
+# Persistent Chroma client
+chroma_client = chromadb.Client(
+    Settings(
+        persist_directory="./chroma_db",
+        is_persistent=True
+    )
+)
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+
+def get_collection():
+    return chroma_client.get_or_create_collection(
+        name="rag_collection"
+    )
+
+
+def ingest_pdf(file_path: str):
+    print("Loading PDF...")
+    text = load_pdf(file_path)
+    print("PDF text length:", len(text))
+
+    chunks = chunk_text(text)
+    print("Total chunks created:", len(chunks))
+
+    # Get collection FIRST
+    collection = get_collection()
+
+    # If already has documents, skip ingestion
+    if collection.count() > 0:
+        print("Collection already has documents. Skipping ingestion.")
+        print("Current document count:", collection.count())
+        return
+
+    batch_size = 500
+
+    for i in range(0, len(chunks), batch_size):
+        batch_chunks = chunks[i:i+batch_size]
+        embeddings = model.encode(batch_chunks).tolist()
+        ids = [f"id_{j}" for j in range(i, i + len(batch_chunks))]
+
+        collection.add(
+            documents=batch_chunks,
+            embeddings=embeddings,
+            ids=ids
         )
 
-        self.db = Chroma(
-            collection_name="nec_collection",
-            embedding_function=self.embedding_model,
-            persist_directory="./chroma_db"
-        )
+        print(f"Inserted batch {i} to {i+len(batch_chunks)}")
 
-    def add_documents(self, documents):
-        self.db.add_documents(documents)
+    print("Final document count:", collection.count())
 
-    def search(self, query, k=3):
-        docs = self.db.similarity_search(query, k=k)
-        return [doc.page_content for doc in docs]
+
+
+def retrieve(query: str, k: int = 3):
+    collection = get_collection()
+
+    if collection.count() == 0:
+        print("No documents in DB")
+        return ""
+
+    query_embedding = model.encode([query]).tolist()
+
+    results = collection.query(
+        query_embeddings=query_embedding,
+        n_results=k
+    )
+
+    documents = results.get("documents", [])
+
+    if not documents or not documents[0]:
+        return ""
+
+    return " ".join(documents[0])
