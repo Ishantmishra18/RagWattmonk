@@ -83,26 +83,26 @@ source .venv/bin/activate      # Mac/Linux
 .venv\Scripts\activate         # Windows
 ```
 
-##2️⃣ Install Dependencies
+## 2️⃣ Install Dependencies
 ```
 pip install -r requirements.txt
 ```
 
-##3️⃣ Run Backend Server
+## 3️⃣ Run Backend Server
 ```
 uvicorn main:app --reload
 ```
 Server will run at:
 http://127.0.0.1:8000
 
-##📥 Ingest Document
+## 📥 Ingest Document
 Open browser:
 ```
 (http://127.0.0.1:8000/ingest_pdf
 )
 ```
 
-##🔍 Verify Database
+## 🔍 Verify Database
 ```
 http://127.0.0.1:8000/count
 ```
@@ -114,20 +114,20 @@ Expected:
 }
 
 
-#🎨 Frontend Setup (React + Tailwind)
-##1️⃣ Install Dependencies
+# 🎨 Frontend Setup (React + Tailwind)
+## 1️⃣ Install Dependencies
 ```
 cd frontend
 npm install
 ```
 
-##2️⃣ Start Frontend
+## 2️⃣ Start Frontend
 ```
 npm run dev
 
 ```
 
-#🔐 Environment Variables
+# 🔐 Environment Variables
 
 If using Gemini/OpenAI:
 
