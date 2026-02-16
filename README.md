@@ -98,8 +98,7 @@ http://127.0.0.1:8000
 ## 📥 Ingest Document
 Open browser:
 ```
-(http://127.0.0.1:8000/ingest_pdf
-)
+http://127.0.0.1:8000/ingest_pdf
 ```
 
 ## 🔍 Verify Database
