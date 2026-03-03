@@ -6,3 +6,7 @@ export async function askQuestion(query) {
   );
   return response.json();
 }
+export async function fetchData() {
+  const response = await fetch(`${BASE_URL}/data`);
+  return response.json();
+}
